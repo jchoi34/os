@@ -72,5 +72,8 @@ int sys_lseek(int fd, off_t offset, int code, off_t *retval);
 int sys_chdir(const_userptr_t path);
 int sys___getcwd(userptr_t buf, size_t buflen, int *retval);
 
-
+pid_t sys_fork(struct trapframe *tf, int *err);
+void sys__exit(int exitcode);
+pid_t sys_waitpid(pid_t pid, int *status, int options, int *err);
+pid_t sys_getpid(void);
 #endif /* _SYSCALL_H_ */
