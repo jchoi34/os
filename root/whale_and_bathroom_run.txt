@@ -1,0 +1,167 @@
+Script started on Tue 25 Sep 2018 06:28:33 PM EDT
+[?1034hbash-4.2$ sys161 kernel
+sys161: System/161 release 2.0.2, compiled Feb  2 2015 11:24:13
+
+OS/161 base system version 2.0
+Copyright (c) 2000, 2001-2005, 2008-2011, 2013, 2014
+   President and Fellows of Harvard College.  All rights reserved.
+
+Put-your-group-name-here's system version 0 (ASST3 #69)
+
+2832k physical memory available
+Device probe...
+lamebus0 (system main bus)
+emu0 at lamebus0
+ltrace0 at lamebus0
+ltimer0 at lamebus0
+beep0 at ltimer0
+rtclock0 at ltimer0
+lrandom0 at lamebus0
+random0 at lrandom0
+lhd0 at lamebus0
+lhd1 at lamebus0
+lser0 at lamebus0
+con0 at lser0
+
+cpu0: MIPS/161 (System/161 2.x) features 0x0
+cpu1: MIPS/161 (System/161 2.x) features 0x0
+OS/161 kernel [? for menu]: sp1
+Operation took 0.007320640 seconds
+OS/161 kernel [? for menu]: female whale #2 starting
+female whale #6 starting
+female whale #9 starting
+male whale #9 starting
+male whale #0 starting
+matchmaker whale #8 starting
+matchmaker whale #8 finished
+female whale #0 starting
+matchmaker whale #1 starting
+matchmaker whale #1 finished
+male whale #2 starting
+female whale #4 starting
+matchmaker whale #7 starting
+female whale #5 starting
+female whale #3 starting
+female whale #8 starting
+male whale #4 starting
+female whale #1 starting
+matchmaker whale #3 starting
+matchmaker whale #3 finished
+matchmaker whale #0 starting
+male whale #6 starting
+matchmaker whale #9 starting
+male whale #8 starting
+male whale #5 starting
+matchmaker whale #6 starting
+matchmaker whale #6 finished
+male whale #3 starting
+male whale #7 starting
+matchmaker whale #4 starting
+matchmaker whale #4 finished
+male whale #9 finished
+female whale #2 finished
+matchmaker whale #2 starting
+matchmaker whale #2 finished
+female whale #6 finished
+matchmaker whale #7 finished
+female whale #9 finished
+male whale #2 finished
+male whale #4 finished
+female whale #7 starting
+female whale #0 finished
+matchmaker whale #0 finished
+male whale #6 finished
+female whale #4 finished
+matchmaker whale #9 finished
+female whale #5 finished
+male whale #8 finished
+female whale #3 finished
+male whale #1 starting
+male whale #5 finished
+female whale #8 finished
+matchmaker whale #5 starting
+matchmaker whale #5 finished
+male whale #0 finished
+female whale #1 finished
+male whale #7 finished
+male whale #3 finished
+male whale #1 finished
+female whale #7 finished
+
+OS/161 kernel [? for menu]: sp2
+Operation took 0.003342040 seconds
+OS/161 kernel [? for menu]: girl #5 starting
+girl #5 entering bathroom
+boy #2 starting
+girl #15 starting
+girl #15 entering bathroom
+boy #12 starting
+boy #18 starting
+girl #13 starting
+girl #13 entering bathroom
+boy #4 starting
+girl #5 leaving bathroom
+girl #15 leaving bathroom
+girl #19 starting
+girl #9 starting
+girl #1 starting
+boy #16 starting
+girl #7 starting
+girl #11 starting
+boy #14 starting
+boy #0 starting
+boy #6 starting
+boy #10 starting
+girl #17 starting
+boy #8 starting
+girl #3 starting
+girl #13 leaving bathroom
+boy #2 entering bathroom...
+boy #12 entering bathroom...
+boy #18 entering bathroom...
+boy #2 leaving bathroom
+boy #18 leaving bathroom
+boy #12 leaving bathroom
+girl #19 entering bathroom
+girl #9 entering bathroom
+girl #1 entering bathroom
+girl #19 leaving bathroom
+girl #9 leaving bathroom
+girl #1 leaving bathroom
+boy #16 entering bathroom...
+boy #4 entering bathroom...
+boy #14 entering bathroom...
+boy #4 leaving bathroom
+boy #16 leaving bathroom
+boy #14 leaving bathroom
+girl #7 entering bathroom
+girl #11 entering bathroom
+girl #17 entering bathroom
+girl #7 leaving bathroom
+girl #11 leaving bathroom
+girl #17 leaving bathroom
+boy #0 entering bathroom...
+boy #6 entering bathroom...
+boy #10 entering bathroom...
+boy #0 leaving bathroom
+boy #10 leaving bathroom
+boy #6 leaving bathroom
+girl #3 entering bathroom
+girl #3 leaving bathroom
+boy #8 entering bathroom...
+boy #8 leaving bathroom
+
+OS/161 kernel [? for menu]: q
+Shutting down.
+The system is halted.
+cpu1: offline.
+sys161: 1021932862 cycles (187426366 run, 834506496 global-idle)
+sys161:   cpu0: 31381841 kern, 0 user, 5736752 idle; 48508 ll, 48508/0 sc, 136846 sync
+sys161:   cpu1: 13909390 kern, 0 user, 23209203 idle; 20760 ll, 20760/0 sc, 45599 sync
+sys161: 7577 irqs 0 exns 0r/0w disk 12r/3781w console 0r/0w/1m emufs 0r/0w net
+sys161: Elapsed real time: 35.861066 seconds (28.497 mhz)
+sys161: Elapsed virtual time: 40.881604797 seconds (25 mhz)
+bash-4.2$ ^C
+bash-4.2$ exit
+
+Script done on Tue 25 Sep 2018 06:29:19 PM EDT

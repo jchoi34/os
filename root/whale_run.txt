@@ -1,0 +1,133 @@
+Script started on Tue 25 Sep 2018 10:04:28 PM EDT
+[?1034hbash-4.2$ sys161 kernel
+sys161: System/161 release 2.0.2, compiled Feb  2 2015 11:24:13
+
+OS/161 base system version 2.0
+Copyright (c) 2000, 2001-2005, 2008-2011, 2013, 2014
+   President and Fellows of Harvard College.  All rights reserved.
+
+Put-your-group-name-here's system version 0 (ASST3 #78)
+
+2828k physical memory available
+Device probe...
+lamebus0 (system main bus)
+emu0 at lamebus0
+ltrace0 at lamebus0
+ltimer0 at lamebus0
+beep0 at ltimer0
+rtclock0 at ltimer0
+lrandom0 at lamebus0
+random0 at lrandom0
+lhd0 at lamebus0
+lhd1 at lamebus0
+lser0 at lamebus0
+con0 at lser0
+
+cpu0: MIPS/161 (System/161 2.x) features 0x0
+cpu1: MIPS/161 (System/161 2.x) features 0x0
+OS/161 kernel [? for menu]: sp1
+Operation took 0.008262120 seconds
+OS/161 kernel [? for menu]: male whale #8 starting
+matchmaker whale #7 starting
+female whale #6 starting
+matchmaker whale #0 starting
+matchmaker whale #3 starting
+matchmaker whale #9 starting
+matchmaker whale #1 starting
+matchmaker whale #4 starting
+female whale #3 starting
+female whale #4 starting
+matchmaker whale #2 starting
+female whale #1 starting
+female whale #7 starting
+female whale #9 starting
+female whale #2 starting
+female whale #8 starting
+female whale #5 starting
+matchmaker whale #6 starting
+matchmaker whale #8 starting
+male whale #9 starting
+male whale #1 starting
+male whale #3 starting
+male whale #0 starting
+matchmaker whale #5 starting
+male whale #2 starting
+male whale #7 starting
+male whale #4 starting
+female whale #0 starting
+male whale #5 starting
+male whale #6 starting
+matchmaker whale #7 mating
+male whale #8 mating
+female whale #6 mating
+female whale #6 finished
+matchmaker whale #7 finished
+male whale #8 finished
+matchmaker whale #0 mating
+male whale #9 mating
+female whale #3 mating
+female whale #3 finished
+male whale #9 finished
+matchmaker whale #0 finished
+matchmaker whale #3 mating
+male whale #1 mating
+female whale #4 mating
+female whale #4 finished
+male whale #1 finished
+matchmaker whale #3 finished
+matchmaker whale #9 mating
+male whale #3 mating
+female whale #1 mating
+female whale #1 finished
+matchmaker whale #9 finished
+male whale #3 finished
+matchmaker whale #1 mating
+male whale #0 mating
+female whale #7 mating
+female whale #7 finished
+male whale #0 finished
+matchmaker whale #1 finished
+matchmaker whale #4 mating
+male whale #2 mating
+female whale #9 mating
+female whale #9 finished
+male whale #2 finished
+matchmaker whale #4 finished
+matchmaker whale #2 mating
+male whale #7 mating
+female whale #2 mating
+female whale #2 finished
+male whale #7 finished
+matchmaker whale #2 finished
+matchmaker whale #6 mating
+male whale #4 mating
+female whale #8 mating
+female whale #8 finished
+matchmaker whale #6 finished
+male whale #4 finished
+matchmaker whale #8 mating
+female whale #5 mating
+male whale #5 mating
+male whale #5 finished
+female whale #5 finished
+matchmaker whale #8 finished
+matchmaker whale #5 mating
+male whale #6 mating
+female whale #0 mating
+female whale #0 finished
+matchmaker whale #5 finished
+male whale #6 finished
+
+OS/161 kernel [? for menu]: q
+Shutting down.
+The system is halted.
+cpu0: offline.
+sys161: 336570622 cycles (147626215 run, 188944407 global-idle)
+sys161:   cpu0: 26510740 kern, 0 user, 2023325 idle; 40776 ll, 40776/0 sc, 105454 sync
+sys161:   cpu1: 7070396 kern, 0 user, 21463669 idle; 9924 ll, 9924/0 sc, 33589 sync
+sys161: 5980 irqs 0 exns 0r/0w disk 7r/3005w console 0r/0w/1m emufs 0r/0w net
+sys161: Elapsed real time: 9.263056 seconds (36.3347 mhz)
+sys161: Elapsed virtual time: 13.467114601 seconds (25 mhz)
+bash-4.2$ exit
+
+Script done on Tue 25 Sep 2018 10:04:44 PM EDT

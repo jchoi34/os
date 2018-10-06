@@ -1,0 +1,103 @@
+Script started on Tue 25 Sep 2018 10:20:59 PM EDT
+[?1034hbash-4.2$ sys161 kernel
+sys161: System/161 release 2.0.2, compiled Feb  2 2015 11:24:13
+
+OS/161 base system version 2.0
+Copyright (c) 2000, 2001-2005, 2008-2011, 2013, 2014
+   President and Fellows of Harvard College.  All rights reserved.
+
+Put-your-group-name-here's system version 0 (ASST3 #78)
+
+2828k physical memory available
+Device probe...
+lamebus0 (system main bus)
+emu0 at lamebus0
+ltrace0 at lamebus0
+ltimer0 at lamebus0
+beep0 at ltimer0
+rtclock0 at ltimer0
+lrandom0 at lamebus0
+random0 at lrandom0
+lhd0 at lamebus0
+lhd1 at lamebus0
+lser0 at lamebus0
+con0 at lser0
+
+cpu0: MIPS/161 (System/161 2.x) features 0x0
+cpu1: MIPS/161 (System/161 2.x) features 0x0
+OS/161 kernel [? for menu]: sp2
+Operation took 0.003762960 seconds
+OS/161 kernel [? for menu]: girl #15 starting
+girl #15 entering bathroom
+girl #3 starting
+girl #3 entering bathroom
+girl #17 starting
+girl #17 entering bathroom
+boy #2 starting
+boy #18 starting
+boy #12 starting
+girl #11 starting
+girl #15 leaving bathroom
+girl #3 leaving bathroom
+girl #17 leaving bathroom
+boy #10 starting
+boy #6 starting
+boy #16 starting
+girl #9 starting
+girl #5 starting
+girl #13 starting
+boy #14 starting
+girl #7 starting
+boy #8 starting
+boy #0 starting
+boy #4 starting
+girl #1 starting
+girl #19 starting
+boy #18 entering bathroom...
+boy #12 entering bathroom...
+boy #2 entering bathroom...
+boy #18 leaving bathroom
+boy #2 leaving bathroom
+boy #12 leaving bathroom
+girl #9 entering bathroom
+girl #11 entering bathroom
+girl #5 entering bathroom
+girl #11 leaving bathroom
+girl #9 leaving bathroom
+girl #5 leaving bathroom
+boy #10 entering bathroom...
+boy #16 entering bathroom...
+boy #6 entering bathroom...
+boy #10 leaving bathroom
+boy #6 leaving bathroom
+boy #16 leaving bathroom
+girl #7 entering bathroom
+girl #13 entering bathroom
+girl #1 entering bathroom
+girl #13 leaving bathroom
+girl #7 leaving bathroom
+girl #1 leaving bathroom
+boy #14 entering bathroom...
+boy #8 entering bathroom...
+boy #0 entering bathroom...
+boy #14 leaving bathroom
+boy #8 leaving bathroom
+boy #0 leaving bathroom
+girl #19 entering bathroom
+girl #19 leaving bathroom
+boy #4 entering bathroom...
+boy #4 leaving bathroom
+
+OS/161 kernel [? for menu]: q
+Shutting down.
+The system is halted.
+cpu0: offline.
+sys161: 382905012 cycles (106526632 run, 276378380 global-idle)
+sys161:   cpu0: 19732141 kern, 0 user, 1135796 idle; 29816 ll, 29816/0 sc, 77584 sync
+sys161:   cpu1: 4354222 kern, 0 user, 16513715 idle; 5322 ll, 5322/0 sc, 23476 sync
+sys161: 4244 irqs 0 exns 0r/0w disk 7r/2145w console 0r/0w/1m emufs 0r/0w net
+sys161: Elapsed real time: 12.446923 seconds (30.763 mhz)
+sys161: Elapsed virtual time: 15.320490278 seconds (25 mhz)
+bash-4.2$ exit
+
+Script done on Tue 25 Sep 2018 10:21:17 PM EDT
