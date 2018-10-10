@@ -50,11 +50,17 @@
 #include <addrspace.h>
 #include <vnode.h>
 #include <filetable.h>
+#include <proctable.h>
+#include <synch.h>
 
 /*
  * The process for the kernel; this holds all the kernel-only threads.
  */
 struct proc *kproc;
+
+struct array *process_table;	// process table
+struct lock *getpid_lock;	// pid lock
+struct lock *global_lock;	// global lock
 
 /*
  * Create a proc structure.
@@ -85,7 +91,24 @@ proc_create(const char *name)
 	proc->p_cwd = NULL;
 	proc->p_filetable = NULL;
 
+	// PID stuff
+	KASSERT(getpid_lock != NULL);
+	lock_acquire(getpid_lock);
+	proc->pid = get_pid();
+	array_set(process_table, proc->pid, proc);
+	lock_release(getpid_lock);
 	return proc;
+}
+
+// go through the process table sequentially and look for a free pid
+pid_t get_pid() {
+	KASSERT(process_table != NULL);
+	int i;
+	for(i = PID_MIN; i < PID_MAX; i++) {
+		if(array_get(process_table, i) == NULL)
+			return (pid_t) i;
+	}
+	return -1;	// no available pid
 }
 
 /*
@@ -189,6 +212,22 @@ proc_bootstrap(void)
 	if (kproc == NULL) {
 		panic("proc_create for kproc failed\n");
 	}
+
+	// create the processes table
+	process_table = array_create();
+	if(process_table == NULL)
+		panic("Cannot create process table\n");
+	array_setsize(process_table, PID_MAX);
+	
+	// PID lock
+	getpid_lock = lock_create("pid_lock");
+	if(getpid_lock == NULL)
+		panic("Could not create pid lock");
+
+	// Global lock
+	global_lock = lock_create("global_lock");
+	if(global_lock == NULL)
+		panic("Could not create global lock");
 }
 
 /*

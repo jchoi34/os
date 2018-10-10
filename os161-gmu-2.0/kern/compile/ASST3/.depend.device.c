@@ -6,4 +6,7 @@ device.o: ../../vfs/device.c ../../include/types.h \
   ../../include/lib.h ../../include/cdefs.h opt-noasserts.h \
   ../../include/uio.h ../../include/kern/iovec.h ../../include/synch.h \
   ../../include/spinlock.h includelinks/machine/spinlock.h \
-  ../../include/vnode.h ../../include/device.h
+  ../../include/thread.h ../../include/array.h ../../include/threadlist.h \
+  includelinks/machine/thread.h ../../include/setjmp.h \
+  includelinks/kern/machine/setjmp.h ../../include/vnode.h \
+  ../../include/device.h

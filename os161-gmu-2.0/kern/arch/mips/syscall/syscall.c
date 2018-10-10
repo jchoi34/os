@@ -195,7 +195,22 @@ syscall(struct trapframe *tf)
 
 
 	    /* Even more system calls will go here */
+		
+		case SYS_getpid:
 
+		break;
+
+		case SYS_fork:
+
+		break;
+	
+		case SYS_waitpid:
+
+		break;
+
+		case SYS__exit:
+
+		break;
 
 	    default:
 		kprintf("Unknown syscall %d\n", callno);
