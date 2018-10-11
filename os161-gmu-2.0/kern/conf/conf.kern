@@ -380,6 +380,7 @@ file      syscall/runprogram.c
 file      syscall/file_syscalls.c
 file      syscall/time_syscalls.c
 file      syscall/getpid.c
+file      syscall/exit.c
 
 #
 # Startup and initialization

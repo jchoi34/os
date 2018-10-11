@@ -39,16 +39,10 @@
 #include <spinlock.h>
 #include <thread.h> /* required for struct threadarray */
 #include <proctable.h>
+#include <synch.h>
 
 struct addrspace;
 struct vnode;
-
-/* Linked list of pids */
-struct pid_list{
-    pid_t pid;
-    struct pid_list *next;
-};
-
 
 /*
  * Process structure.
@@ -66,11 +60,9 @@ struct proc {
 	struct filetable *p_filetable;	/* table of open files */
 
 	/* add more material here as needed */
-	// process id
-	pid_t pid;
-
-	// Child PIDs stored in linked list
-	struct pid_list *children;
+	pid_t pid;		// process id
+	int exitcode;		// exit code
+	struct cv *p_cv;	// cv for this proc
 };
 
 /* This is the process structure for the kernel and for kernel-only threads. */

@@ -61,6 +61,7 @@ struct proc *kproc;
 struct array *process_table;	// process table
 struct lock *getpid_lock;	// pid lock
 struct lock *global_lock;	// global lock
+int num_process = 0;
 
 /*
  * Create a proc structure.
@@ -81,6 +82,22 @@ proc_create(const char *name)
 		return NULL;
 	}
 
+	// PID stuff
+	KASSERT(getpid_lock != NULL);
+
+	lock_acquire(getpid_lock);
+	pid_t pid = get_pid();
+	if(pid == -1) {	// no more pids
+		kfree(proc);
+		lock_release(getpid_lock);
+		return NULL;
+	}
+	proc->pid = pid + 1;
+	array_set(process_table, pid, proc);
+	num_process = (num_process + 1) % (PID_MAX - 1); 
+	kprintf("PID: %d\n", proc->pid);
+	lock_release(getpid_lock);
+
 	threadarray_init(&proc->p_threads);
 	spinlock_init(&proc->p_lock);
 
@@ -90,13 +107,7 @@ proc_create(const char *name)
 	/* VFS fields */
 	proc->p_cwd = NULL;
 	proc->p_filetable = NULL;
-
-	// PID stuff
-	KASSERT(getpid_lock != NULL);
-	lock_acquire(getpid_lock);
-	proc->pid = get_pid();
-	array_set(process_table, proc->pid, proc);
-	lock_release(getpid_lock);
+	
 	return proc;
 }
 
@@ -104,7 +115,7 @@ proc_create(const char *name)
 pid_t get_pid() {
 	KASSERT(process_table != NULL);
 	int i;
-	for(i = PID_MIN; i < PID_MAX; i++) {
+	for(i = num_process; i < PID_MAX-1; i++) {
 		if(array_get(process_table, i) == NULL)
 			return (pid_t) i;
 	}
@@ -198,6 +209,10 @@ proc_destroy(struct proc *proc)
 	threadarray_cleanup(&proc->p_threads);
 	spinlock_cleanup(&proc->p_lock);
 
+	// pid reclamation
+	lock_acquire(getpid_lock);
+	array_remove(process_table, proc->pid - 1);
+	lock_release(getpid_lock);
 	kfree(proc->p_name);
 	kfree(proc);
 }
@@ -208,16 +223,11 @@ proc_destroy(struct proc *proc)
 void
 proc_bootstrap(void)
 {
-	kproc = proc_create("[kernel]");
-	if (kproc == NULL) {
-		panic("proc_create for kproc failed\n");
-	}
-
 	// create the processes table
 	process_table = array_create();
 	if(process_table == NULL)
 		panic("Cannot create process table\n");
-	array_setsize(process_table, PID_MAX);
+	array_setsize(process_table, PID_MAX-1);
 	
 	// PID lock
 	getpid_lock = lock_create("pid_lock");
@@ -228,6 +238,11 @@ proc_bootstrap(void)
 	global_lock = lock_create("global_lock");
 	if(global_lock == NULL)
 		panic("Could not create global lock");
+
+	kproc = proc_create("[kernel]");
+	if (kproc == NULL) {
+		panic("proc_create for kproc failed\n");
+	}
 }
 
 /*
