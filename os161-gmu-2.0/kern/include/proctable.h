@@ -5,4 +5,3 @@
 extern struct array *process_table;
 extern struct lock *getpid_lock;
 extern struct lock *global_lock;
-extern int num_process;

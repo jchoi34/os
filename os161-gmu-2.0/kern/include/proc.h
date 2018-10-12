@@ -44,6 +44,12 @@
 struct addrspace;
 struct vnode;
 
+/* Linked list of pids */
+struct pid_list {
+    pid_t pid;
+    struct pid_list *next;
+};
+
 /*
  * Process structure.
  */
@@ -63,6 +69,9 @@ struct proc {
 	pid_t pid;		// process id
 	int exitcode;		// exit code
 	struct cv *p_cv;	// cv for this proc
+	struct lock *lock;	// lock for this proc
+	int waiting;		// flag if being waited on
+	struct pid_list *children; // child pids
 };
 
 /* This is the process structure for the kernel and for kernel-only threads. */

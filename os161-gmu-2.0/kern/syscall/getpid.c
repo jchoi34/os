@@ -1,6 +1,8 @@
 #include <types.h>
 #include <current.h>
+#include <proc.h>
+#include <syscall.h>
 
-pid_t sys_getpid(void){
+pid_t sys_getpid(void) {
         return curproc->pid;
 }

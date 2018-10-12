@@ -61,7 +61,6 @@ struct proc *kproc;
 struct array *process_table;	// process table
 struct lock *getpid_lock;	// pid lock
 struct lock *global_lock;	// global lock
-int num_process = 0;
 
 /*
  * Create a proc structure.
@@ -88,15 +87,35 @@ proc_create(const char *name)
 	lock_acquire(getpid_lock);
 	pid_t pid = get_pid();
 	if(pid == -1) {	// no more pids
+		kfree(proc->p_name);
 		kfree(proc);
 		lock_release(getpid_lock);
 		return NULL;
 	}
 	proc->pid = pid + 1;
 	array_set(process_table, pid, proc);
-	num_process = (num_process + 1) % (PID_MAX - 1); 
-	kprintf("PID: %d\n", proc->pid);
 	lock_release(getpid_lock);
+
+	proc->waiting = 0;
+	
+	proc->p_cv = cv_create(proc->p_name);
+	if(proc->p_cv == NULL) {
+		array_remove(process_table, pid);
+		kfree(proc->p_name);
+		kfree(proc);
+		return NULL;
+	}
+
+	proc->lock = lock_create(proc->p_name);
+	if(proc->lock == NULL) {
+		array_remove(process_table, pid);
+		cv_destroy(proc->p_cv);
+		kfree(proc->p_name);
+		kfree(proc);
+		return NULL;
+	}
+
+	proc->exitcode = -1;
 
 	threadarray_init(&proc->p_threads);
 	spinlock_init(&proc->p_lock);
@@ -115,7 +134,7 @@ proc_create(const char *name)
 pid_t get_pid() {
 	KASSERT(process_table != NULL);
 	int i;
-	for(i = num_process; i < PID_MAX-1; i++) {
+	for(i = 0; i < PID_MAX-1; i++) {
 		if(array_get(process_table, i) == NULL)
 			return (pid_t) i;
 	}
@@ -142,6 +161,10 @@ proc_destroy(struct proc *proc)
 	KASSERT(proc != NULL);
 	KASSERT(proc != kproc);
 
+	// pid reclamation
+	lock_acquire(getpid_lock);
+	array_remove(process_table, proc->pid - 1);
+	lock_release(getpid_lock);
 	/*
 	 * We don't take p_lock in here because we must have the only
 	 * reference to this structure. (Otherwise it would be
@@ -206,13 +229,19 @@ proc_destroy(struct proc *proc)
 		as_destroy(as);
 	}
 
+	cv_destroy(proc->p_cv);
+	lock_destroy(proc->lock);
 	threadarray_cleanup(&proc->p_threads);
 	spinlock_cleanup(&proc->p_lock);
-
-	// pid reclamation
-	lock_acquire(getpid_lock);
-	array_remove(process_table, proc->pid - 1);
-	lock_release(getpid_lock);
+	// free linked list of pids
+	struct pid_list *tofree;
+	while(proc->children != NULL){
+		tofree = proc->children;
+		proc->children = proc->children->next;	
+		kfree(tofree);
+	}
+	
+	
 	kfree(proc->p_name);
 	kfree(proc);
 }
