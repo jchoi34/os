@@ -60,7 +60,9 @@ struct proc *kproc;
 
 struct array *process_table;	// process table
 struct lock *getpid_lock;	// pid lock
-struct lock *global_lock;	// global lock
+struct array *lock_table;
+struct array *cv_table;
+struct array *status_table;
 
 /*
  * Create a proc structure.
@@ -81,41 +83,6 @@ proc_create(const char *name)
 		return NULL;
 	}
 
-	// PID stuff		**** Moving this to fork and create_runprog
-/*	KASSERT(getpid_lock != NULL);
-
-	lock_acquire(getpid_lock);
-	pid_t pid = get_pid();
-	if(pid == -1) {	// no more pids
-		kfree(proc->p_name);
-		kfree(proc);
-		lock_release(getpid_lock);
-		return NULL;
-	}
-	proc->pid = pid + 1;
-	array_set(process_table, pid, proc);
-	lock_release(getpid_lock);
-*/
-
-	proc->waiting = 0;
-	
-	proc->p_cv = cv_create(proc->p_name);
-	if(proc->p_cv == NULL) {
-		kfree(proc->p_name);
-		kfree(proc);
-		return NULL;
-	}
-
-	proc->lock = lock_create(proc->p_name);
-	if(proc->lock == NULL) {
-		cv_destroy(proc->p_cv);
-		kfree(proc->p_name);
-		kfree(proc);
-		return NULL;
-	}
-
-	proc->exitcode = -1;
-
 	threadarray_init(&proc->p_threads);
 	spinlock_init(&proc->p_lock);
 
@@ -125,6 +92,7 @@ proc_create(const char *name)
 	/* VFS fields */
 	proc->p_cwd = NULL;
 	proc->p_filetable = NULL;
+	proc->numthreads = 0;
 	
 	return proc;
 }
@@ -162,7 +130,13 @@ proc_destroy(struct proc *proc)
 
 	// pid reclamation
 	lock_acquire(getpid_lock);
-	array_remove(process_table, proc->pid - 1);
+	array_set(process_table, proc->pid - 1, NULL);
+	kfree(array_get(status_table, proc->pid - 1));
+	array_set(status_table, proc->pid - 1, NULL);
+	lock_destroy(array_get(lock_table, proc->pid-1));
+	array_set(lock_table, proc->pid-1, NULL);
+	cv_destroy(array_get(cv_table, proc->pid-1));
+	array_set(cv_table, proc->pid-1, NULL);
 	lock_release(getpid_lock);
 	/*
 	 * We don't take p_lock in here because we must have the only
@@ -227,9 +201,7 @@ proc_destroy(struct proc *proc)
 		}
 		as_destroy(as);
 	}
-
-	cv_destroy(proc->p_cv);
-	lock_destroy(proc->lock);
+	
 	threadarray_cleanup(&proc->p_threads);
 	spinlock_cleanup(&proc->p_lock);
 	// free linked list of pids
@@ -255,16 +227,26 @@ proc_bootstrap(void)
 	if(process_table == NULL)
 		panic("Cannot create process table\n");
 	array_setsize(process_table, PID_MAX-1);
-	
+
+	status_table = array_create();
+	if(status_table == NULL)
+		panic("Cannot create status table\n");
+	array_setsize(status_table, PID_MAX-PID_MIN);
+
+	lock_table = array_create();
+	if(lock_table == NULL)
+		panic("Cannot create lock table\n");
+	array_setsize(lock_table, PID_MAX-PID_MIN);
+
+	cv_table = array_create();
+	if(cv_table == NULL)
+		panic("Cannot create cv table\n");
+	array_setsize(cv_table, PID_MAX-PID_MIN);
+
 	// PID lock
 	getpid_lock = lock_create("pid_lock");
 	if(getpid_lock == NULL)
 		panic("Could not create pid lock");
-
-	// Global lock
-	global_lock = lock_create("global_lock");
-	if(global_lock == NULL)
-		panic("Could not create global lock");
 
 	kproc = proc_create("[kernel]");
 	if (kproc == NULL) {
@@ -272,7 +254,7 @@ proc_bootstrap(void)
 	}
 	// only process at the time so don't need to synchronize this
 	kproc->pid = 1;
-	array_set(process_table, 0, kproc);
+	kproc->numthreads = 1;
 }
 
 /*

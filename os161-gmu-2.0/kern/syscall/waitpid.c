@@ -34,7 +34,10 @@ pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 	}
 	
 	struct proc *p;
-
+	struct status *s;
+	struct lock *l;
+	struct cv *c;
+	
 	lock_acquire(getpid_lock);
 	p = array_get(process_table, pid - 1);	// get the process from table using pid
 	if(p == NULL){	// process nonexistent
@@ -44,28 +47,31 @@ pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 		*err = ESRCH;
 		return -1;
 	}
-	lock_acquire(p->lock);
-	if(p->exitcode != -1){	// process already exited so return immediately
-		lock_release(p->lock);
+	l = array_get(lock_table, pid-1);
+	c = array_get(cv_table, pid-1);
+	lock_acquire(l);
+	s = array_get(status_table, pid-1);
+	if(s->exitcode != -1){	// process already exited so return immediately
+		lock_release(l);
 		lock_release(getpid_lock);	
 		return pid;
 	}
 	else {			// process not yet exited
 		lock_release(getpid_lock);	
-		p->waiting = 1;	// let child know parent is waiting	
-		cv_wait(p->p_cv, p->lock); // wait for the child while releasing its lock
+		s->waiting = 1;	// let child know parent is waiting	
+		cv_wait(c, l); // wait for the child while releasing its lock
 
 		if(status != NULL) {	// get the status from child
-			if(WIFEXITED(p->exitcode))
-				*status = WEXITSTATUS(p->exitcode);
-			else if(WIFSIGNALED(p->exitcode))
-				*status = WTERMSIG(p->exitcode);
-			else if(WIFSTOPPED(p->exitcode))
-				*status = WSTOPSIG(p->exitcode);
+			if(WIFEXITED(s->exitcode))
+				*status = WEXITSTATUS(s->exitcode);
+			else if(WIFSIGNALED(s->exitcode))
+				*status = WTERMSIG(s->exitcode);
+			else if(WIFSTOPPED(s->exitcode))
+				*status = WSTOPSIG(s->exitcode);
 		}
 
-		cv_signal(p->p_cv, p->lock);	// let the child continue with its exit
-		lock_release(p->lock);	
+		cv_signal(c, l);	// let the child continue with its exit
+		lock_release(l);	
 	}
 
 	return pid;

@@ -37,6 +37,7 @@
 
 #include <spinlock.h>
 #include <thread.h>
+#include <limits.h>
 
 /*
  * Dijkstra-style semaphore.
@@ -83,6 +84,8 @@ struct lock {
 	struct thread *holder;
 };
 
+extern struct lock locks[PID_MAX-PID_MIN];
+
 struct lock *lock_create(const char *name);
 void lock_destroy(struct lock *);
 
@@ -126,6 +129,8 @@ struct cv {
         struct wchan *cv_wchan;
 	struct spinlock cv_spinlock;
 };
+
+extern struct cv cvs[PID_MAX-PID_MIN];
 
 struct cv *cv_create(const char *name);
 void cv_destroy(struct cv *);

@@ -515,7 +515,7 @@ thread_fork(const char *name,
 		return ENOMEM;
 	}
 	thread_checkstack_init(newthread);
-
+	/* stick a magic number on the bottom end of the stack */
 	/*
 	 * Now we clone various fields from the parent thread.
 	 */
@@ -533,7 +533,7 @@ thread_fork(const char *name,
 		thread_destroy(newthread);
 		return result;
 	}
-
+	proc->numthreads++;
 	/*
 	 * Because new threads come out holding the cpu runqueue lock
 	 * (see notes at bottom of thread_switch), we need to account

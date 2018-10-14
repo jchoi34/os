@@ -50,6 +50,11 @@ struct pid_list {
     struct pid_list *next;
 };
 
+struct status {
+	int exitcode;
+	int waiting;
+};
+
 /*
  * Process structure.
  */
@@ -67,11 +72,11 @@ struct proc {
 
 	/* add more material here as needed */
 	pid_t pid;		// process id
-	int exitcode;		// exit code
 	struct cv *p_cv;	// cv for this proc
 	struct lock *lock;	// lock for this proc
-	int waiting;		// flag if being waited on
+	struct semaphore *p_sem;
 	struct pid_list *children; // child pids
+	int numthreads;
 };
 
 /* This is the process structure for the kernel and for kernel-only threads. */
