@@ -81,8 +81,8 @@ proc_create(const char *name)
 		return NULL;
 	}
 
-	// PID stuff
-	KASSERT(getpid_lock != NULL);
+	// PID stuff		**** Moving this to fork and create_runprog
+/*	KASSERT(getpid_lock != NULL);
 
 	lock_acquire(getpid_lock);
 	pid_t pid = get_pid();
@@ -95,12 +95,12 @@ proc_create(const char *name)
 	proc->pid = pid + 1;
 	array_set(process_table, pid, proc);
 	lock_release(getpid_lock);
+*/
 
 	proc->waiting = 0;
 	
 	proc->p_cv = cv_create(proc->p_name);
 	if(proc->p_cv == NULL) {
-		array_remove(process_table, pid);
 		kfree(proc->p_name);
 		kfree(proc);
 		return NULL;
@@ -108,7 +108,6 @@ proc_create(const char *name)
 
 	proc->lock = lock_create(proc->p_name);
 	if(proc->lock == NULL) {
-		array_remove(process_table, pid);
 		cv_destroy(proc->p_cv);
 		kfree(proc->p_name);
 		kfree(proc);
@@ -134,7 +133,7 @@ proc_create(const char *name)
 pid_t get_pid() {
 	KASSERT(process_table != NULL);
 	int i;
-	for(i = 0; i < PID_MAX-1; i++) {
+	for(i = 1; i < PID_MAX-1; i++) {
 		if(array_get(process_table, i) == NULL)
 			return (pid_t) i;
 	}
@@ -241,7 +240,6 @@ proc_destroy(struct proc *proc)
 		kfree(tofree);
 	}
 	
-	
 	kfree(proc->p_name);
 	kfree(proc);
 }
@@ -272,6 +270,9 @@ proc_bootstrap(void)
 	if (kproc == NULL) {
 		panic("proc_create for kproc failed\n");
 	}
+	// only process at the time so don't need to synchronize this
+	kproc->pid = 1;
+	array_set(process_table, 0, kproc);
 }
 
 /*
@@ -292,6 +293,18 @@ proc_create_runprogram(const char *name)
 	if (newproc == NULL) {
 		return NULL;
 	}
+	KASSERT(getpid_lock != NULL);
+
+	lock_acquire(getpid_lock);
+	pid_t pid = get_pid();
+	if(pid == -1) {	// no more pids
+		kfree(newproc);
+		lock_release(getpid_lock);
+		return NULL;
+	}
+	newproc->pid = pid + 1;
+	array_set(process_table, pid, newproc);
+	lock_release(getpid_lock);
 
 	/* VM fields */
 

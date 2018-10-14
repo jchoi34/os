@@ -1,4 +1,4 @@
-waitpid.o: ../../syscall/waitpid.c ../../include/types.h \
+fork.o: ../../syscall/fork.c ../../include/types.h \
   ../../include/kern/types.h includelinks/kern/machine/types.h \
   includelinks/machine/types.h ../../include/proc.h \
   ../../include/spinlock.h ../../include/cdefs.h \
@@ -10,4 +10,5 @@ waitpid.o: ../../syscall/waitpid.c ../../include/types.h \
   ../../include/kern/limits.h ../../include/synch.h \
   ../../include/current.h includelinks/machine/current.h \
   ../../include/syscall.h ../../include/kern/errno.h \
-  ../../include/kern/wait.h
+  includelinks/mips/trapframe.h ../../include/addrspace.h \
+  ../../include/vm.h includelinks/machine/vm.h opt-dumbvm.h
