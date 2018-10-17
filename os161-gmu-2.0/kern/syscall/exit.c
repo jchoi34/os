@@ -18,6 +18,17 @@ void sys__exit(int exitcode) {
 	lock_acquire(l);
 	s = array_get(status_table, curproc->pid-1);
 	s->exitcode = _MKWAIT_EXIT(exitcode);
+	
+	struct pid_list *temp;
+
+	temp = curproc->parent->children;
+
+	while(temp != NULL) {
+		if(temp->pid == curproc->pid) {
+			temp->exitcode = s->exitcode;
+			break;
+		}
+	}
 
 	if(s->waiting == 1) {
 		cv_signal(c, l);

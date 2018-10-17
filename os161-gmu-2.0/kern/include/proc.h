@@ -48,6 +48,7 @@ struct vnode;
 struct pid_list {
     pid_t pid;
     struct pid_list *next;
+	int exitcode;
 };
 
 struct status {
@@ -77,6 +78,7 @@ struct proc {
 	struct semaphore *p_sem;
 	struct pid_list *children; // child pids
 	int numthreads;
+	struct proc *parent;
 };
 
 /* This is the process structure for the kernel and for kernel-only threads. */

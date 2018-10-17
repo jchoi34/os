@@ -97,6 +97,7 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 		goto err1;
 	}
 	child->pid = pid + 1;
+	child->parent = curproc;
 
 	// add child pid to head of list of parent's children
 	struct pid_list *parents_child; 
@@ -106,6 +107,7 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 		goto err2;
 	}
 	parents_child->pid = pid+1;
+	parents_child->exitcode = -1;
 	parents_child->next = curproc->children;	
 	curproc->children = parents_child;
 

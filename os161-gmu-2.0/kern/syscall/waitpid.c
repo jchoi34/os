@@ -10,6 +10,10 @@
 
 pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 
+	struct status *s;
+	struct lock *l;
+	struct cv *c;
+
 	if(options != 0) {
 		if(status != NULL)
 			*status = EINVAL;
@@ -17,9 +21,18 @@ pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 		return -1;
 	}
 	
+	l = array_get(lock_table, pid-1);
+	if(l == NULL){	// process nonexistent
+		if(status != NULL)
+			*status = ESRCH;
+		*err = ESRCH;
+		return -1;
+	}
+	lock_acquire(l);
 	int valid_pid = 0;
 	struct pid_list *temp = curproc->children;
 	while(temp != NULL) {
+		lock_release(l);
 		if(pid == temp->pid) {
 			valid_pid = 1;
 			break;
@@ -27,37 +40,29 @@ pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 		temp = temp->next;
 	}
 	if(!valid_pid) {
+		lock_release(l);
 		if(status != NULL)
 			*status = ECHILD;	// pid arg is not a child of this process
 		*err = ECHILD;
 		return -1;
-	}
-	
-	struct proc *p;
-	struct status *s;
-	struct lock *l;
-	struct cv *c;
-	
-	lock_acquire(getpid_lock);
-	p = array_get(process_table, pid - 1);	// get the process from table using pid
+	}	
+		
+	/*p = array_get(process_table, pid - 1);	// get the process from table using pid
 	if(p == NULL){	// process nonexistent
 		lock_release(getpid_lock);
+		lock_release(l);
 		if(status != NULL)
 			*status = ESRCH;
 		*err = ESRCH;
 		return -1;
-	}
-	l = array_get(lock_table, pid-1);
+	}*/
 	c = array_get(cv_table, pid-1);
-	lock_acquire(l);
 	s = array_get(status_table, pid-1);
-	if(s->exitcode != -1){	// process already exited so return immediately
+	if(temp->exitcode != -1 || s->exitcode != -1){	// process already exited so return immediately
 		lock_release(l);
-		lock_release(getpid_lock);	
 		return pid;
 	}
 	else {			// process not yet exited
-		lock_release(getpid_lock);	
 		s->waiting = 1;	// let child know parent is waiting	
 		cv_wait(c, l); // wait for the child while releasing its lock
 
