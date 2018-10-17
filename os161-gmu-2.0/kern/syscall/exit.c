@@ -8,7 +8,6 @@
 
 void sys__exit(int exitcode) {
 		
-	struct status *s;	
 	struct lock *l;
 	struct cv *c;
 	struct addrspace *as;
@@ -16,8 +15,6 @@ void sys__exit(int exitcode) {
 	l = array_get(lock_table, curproc->pid-1);
 	c = array_get(cv_table, curproc->pid-1);
 	lock_acquire(l);
-	s = array_get(status_table, curproc->pid-1);
-	s->exitcode = _MKWAIT_EXIT(exitcode);
 	
 	struct pid_list *temp;
 
@@ -25,12 +22,13 @@ void sys__exit(int exitcode) {
 
 	while(temp != NULL) {
 		if(temp->pid == curproc->pid) {
-			temp->exitcode = s->exitcode;
+			temp->exitcode = _MKWAIT_EXIT(exitcode);
 			break;
 		}
+		temp = temp->next;
 	}
 
-	if(s->waiting == 1) {
+	if(temp->waiting == 1) {
 		cv_signal(c, l);
 		cv_wait(c, l);	
 	}	

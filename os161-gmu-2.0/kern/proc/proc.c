@@ -131,8 +131,6 @@ proc_destroy(struct proc *proc)
 
 	// pid reclamation
 	lock_acquire(getpid_lock);
-	kfree(array_get(status_table, proc->pid - 1));
-	array_set(status_table, proc->pid - 1, NULL);
 	array_remove(process_table, proc->pid - 1);
 	//lock_destroy(array_get(lock_table, proc->pid-1));
 	//array_remove(lock_table, proc->pid-1);

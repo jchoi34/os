@@ -49,6 +49,7 @@ struct pid_list {
     pid_t pid;
     struct pid_list *next;
 	int exitcode;
+	int waiting;
 };
 
 struct status {

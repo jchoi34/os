@@ -71,20 +71,6 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 		array_set(cv_table, pid, c);
 	}
 
-	s = kmalloc(sizeof(struct status));
-	if(s == NULL) {
-		lock_destroy(array_get(lock_table, pid));
-		array_set(lock_table, pid, NULL);
-		cv_destroy(array_get(cv_table, pid));
-		array_set(cv_table, pid, NULL);
-		lock_release(getpid_lock);
-		*err = ENOMEM;
-		goto err1;
-	}
-	s->exitcode = -1;
-	s->waiting = 0;
-	array_set(status_table, pid, s);
-	
         lock_release(getpid_lock);
 	
 	// create the child process and get the calling process's
@@ -108,6 +94,7 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 	}
 	parents_child->pid = pid+1;
 	parents_child->exitcode = -1;
+	parents_child->waiting = 0;
 	parents_child->next = curproc->children;	
 	curproc->children = parents_child;
 
