@@ -173,6 +173,7 @@ int x;
 if(pid==0)
 {
 putchar('1');
+exit(0);
 }
 else
 {
@@ -181,6 +182,60 @@ waitpid(pid,&x,0);
 putchar('2');
 }
 }
+
+static void test_3()
+{
+int pid=dofork();
+
+int x;
+
+if(pid==0)
+{
+warnx("in child");
+exit(0);
+}
+else
+{
+warnx("in parent %d", pid);
+warnx("waiting on child");
+waitpid(pid,&x,0);
+warnx("child returned with status %d",x);
+}
+
+}
+
+static void test_4()
+{
+int pid,pid2;
+int x,y;
+
+
+pid=dofork();
+pid2=dofork();
+putchar('P');//P can come in any order
+if(pid2==0)
+{
+putchar('A');
+exit(0);
+}
+else
+{
+waitpid(pid2,&x,0);
+putchar('B');//B cannot be printed until A has
+}
+if(pid==0)
+{
+putchar('C');//C can be printed after one AB combo
+exit(0);
+}
+else
+{
+waitpid(pid,&y,0);//D is printed last
+putchar('D');
+}
+
+}
+
 
 int
 main(int argc, char *argv[])
@@ -203,5 +258,9 @@ main(int argc, char *argv[])
 
 	warnx("Complete.");
         test_2();
+        warnx("test_2 complete should read 012");
+        test_3();
+        warnx("test_3 complete");
+        test_4();
 	return 0;
 }
