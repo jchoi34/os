@@ -268,7 +268,6 @@ proc_create_runprogram(const char *name)
 	struct proc *newproc;
 	struct lock *l;
 	struct cv *c;
-	struct status *s;
 
 	newproc = proc_create(name);
 	if (newproc == NULL) {
@@ -308,19 +307,10 @@ proc_create_runprogram(const char *name)
                 array_set(cv_table, pid, c);
         }
 
-        s = kmalloc(sizeof(struct status));
-        if(s == NULL) {
-               	kfree(newproc);
-		lock_destroy(array_get(lock_table, pid));
-		array_set(lock_table, pid, NULL);
-		cv_destroy(array_get(cv_table, pid));
-		array_set(cv_table, pid, NULL);
-		lock_release(getpid_lock);
-		return NULL;
-        }
-        s->exitcode = -1;
-        s->waiting = 0;
-        array_set(status_table, pid, s);
+        //s->exitcode = -1;
+        //s->waiting = 0;
+        //array_set(status_table, pid, s);
+        newproc->parent = curproc;
 	newproc->numthreads = 0;
 	lock_release(getpid_lock);
 

@@ -28,7 +28,7 @@ void sys__exit(int exitcode) {
 		temp = temp->next;
 	}
 
-	if(temp->waiting == 1) {
+	if(temp != NULL && temp->waiting == 1) {
 		cv_signal(c, l);
 		cv_wait(c, l);	
 	}	
