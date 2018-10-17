@@ -62,6 +62,8 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 	if(array_get(cv_table, pid) == NULL) {
 		c = cv_create("cv");
 		if(c == NULL) {
+			lock_destroy(array_get(lock_table, pid));
+			array_set(lock_table, pid, NULL);
         		lock_release(getpid_lock);
 			*err = ENOMEM;
 			goto err1;
@@ -71,6 +73,10 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 
 	s = kmalloc(sizeof(struct status));
 	if(s == NULL) {
+		lock_destroy(array_get(lock_table, pid));
+		array_set(lock_table, pid, NULL);
+		cv_destroy(array_get(cv_table, pid));
+		array_set(cv_table, pid, NULL);
 		lock_release(getpid_lock);
 		*err = ENOMEM;
 		goto err1;

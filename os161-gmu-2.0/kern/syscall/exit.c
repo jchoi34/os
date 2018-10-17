@@ -12,6 +12,8 @@ void sys__exit(int exitcode) {
 	struct cv *c;
 
 	l = array_get(lock_table, curproc->pid-1);
+	pid_t p = curproc->pid-1;
+	kprintf("%d\n", p);
 	c = array_get(cv_table, curproc->pid-1);
 	lock_acquire(l);
 	s = array_get(status_table, curproc->pid-1);

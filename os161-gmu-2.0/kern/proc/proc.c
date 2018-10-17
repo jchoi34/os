@@ -130,9 +130,9 @@ proc_destroy(struct proc *proc)
 
 	// pid reclamation
 	lock_acquire(getpid_lock);
-	array_set(process_table, proc->pid - 1, NULL);
 	kfree(array_get(status_table, proc->pid - 1));
 	array_set(status_table, proc->pid - 1, NULL);
+	array_set(process_table, proc->pid - 1, NULL);
 	lock_destroy(array_get(lock_table, proc->pid-1));
 	array_set(lock_table, proc->pid-1, NULL);
 	cv_destroy(array_get(cv_table, proc->pid-1));
@@ -201,7 +201,11 @@ proc_destroy(struct proc *proc)
 		}
 		as_destroy(as);
 	}
-	
+	int i;
+	int x = proc->numthreads;
+	for(i = 0; i < x; i++) {
+		threadarray_remove(&proc->p_threads, 0);
+	}	
 	threadarray_cleanup(&proc->p_threads);
 	spinlock_cleanup(&proc->p_lock);
 	// free linked list of pids
@@ -254,7 +258,7 @@ proc_bootstrap(void)
 	}
 	// only process at the time so don't need to synchronize this
 	kproc->pid = 1;
-	kproc->numthreads = 1;
+	kproc->numthreads = 0;
 }
 
 /*
@@ -270,6 +274,9 @@ struct proc *
 proc_create_runprogram(const char *name)
 {
 	struct proc *newproc;
+	struct lock *l;
+	struct cv *c;
+	struct status *s;
 
 	newproc = proc_create(name);
 	if (newproc == NULL) {
@@ -286,6 +293,43 @@ proc_create_runprogram(const char *name)
 	}
 	newproc->pid = pid + 1;
 	array_set(process_table, pid, newproc);
+	
+	if(array_get(lock_table, pid) == NULL) {
+                l = lock_create("lock");
+                if(l == NULL) {
+			kfree(newproc);
+			lock_release(getpid_lock);
+			return NULL;
+                }
+                array_set(lock_table, pid, l);
+        }
+
+        if(array_get(cv_table, pid) == NULL) {
+                c = cv_create("cv");
+                if(c == NULL) {
+                        kfree(newproc);
+			lock_destroy(array_get(lock_table, pid));
+			array_set(lock_table, pid, NULL);
+			lock_release(getpid_lock);
+			return NULL;
+                }
+                array_set(cv_table, pid, c);
+        }
+
+        s = kmalloc(sizeof(struct status));
+        if(s == NULL) {
+               	kfree(newproc);
+		lock_destroy(array_get(lock_table, pid));
+		array_set(lock_table, pid, NULL);
+		cv_destroy(array_get(cv_table, pid));
+		array_set(cv_table, pid, NULL);
+		lock_release(getpid_lock);
+		return NULL;
+        }
+        s->exitcode = -1;
+        s->waiting = 0;
+        array_set(status_table, pid, s);
+	newproc->numthreads = 0;
 	lock_release(getpid_lock);
 
 	/* VM fields */
@@ -382,6 +426,7 @@ proc_addthread(struct proc *proc, struct thread *t)
 		return result;
 	}
 	spl = splhigh();
+	proc->numthreads++;
 	t->t_proc = proc;
 	splx(spl);
 	return 0;
