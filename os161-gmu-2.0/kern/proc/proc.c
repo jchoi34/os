@@ -93,6 +93,7 @@ proc_create(const char *name)
 	proc->p_cwd = NULL;
 	proc->p_filetable = NULL;
 	proc->numthreads = 0;
+	proc->children = NULL;
 	
 	return proc;
 }
@@ -132,11 +133,11 @@ proc_destroy(struct proc *proc)
 	lock_acquire(getpid_lock);
 	kfree(array_get(status_table, proc->pid - 1));
 	array_set(status_table, proc->pid - 1, NULL);
-	array_set(process_table, proc->pid - 1, NULL);
-	lock_destroy(array_get(lock_table, proc->pid-1));
-	array_set(lock_table, proc->pid-1, NULL);
-	cv_destroy(array_get(cv_table, proc->pid-1));
-	array_set(cv_table, proc->pid-1, NULL);
+	array_remove(process_table, proc->pid - 1);
+	//lock_destroy(array_get(lock_table, proc->pid-1));
+	//array_remove(lock_table, proc->pid-1);
+	//cv_destroy(array_get(cv_table, proc->pid-1));
+	//array_remove(cv_table, proc->pid-1);
 	lock_release(getpid_lock);
 	/*
 	 * We don't take p_lock in here because we must have the only
@@ -203,18 +204,11 @@ proc_destroy(struct proc *proc)
 	}
 	int i;
 	int x = proc->numthreads;
-	for(i = 0; i < x; i++) {
+	for(i = 0; i < x - 1; i++) {
 		threadarray_remove(&proc->p_threads, 0);
 	}	
 	threadarray_cleanup(&proc->p_threads);
 	spinlock_cleanup(&proc->p_lock);
-	// free linked list of pids
-	struct pid_list *tofree;
-	while(proc->children != NULL){
-		tofree = proc->children;
-		proc->children = proc->children->next;	
-		kfree(tofree);
-	}
 	
 	kfree(proc->p_name);
 	kfree(proc);
@@ -332,6 +326,7 @@ proc_create_runprogram(const char *name)
 	newproc->numthreads = 0;
 	lock_release(getpid_lock);
 
+	newproc->children = NULL;
 	/* VM fields */
 
 	newproc->p_addrspace = NULL;
@@ -461,6 +456,7 @@ proc_remthread(struct thread *t)
 			spl = splhigh();
 			t->t_proc = NULL;
 			splx(spl);
+			proc->numthreads--;
 			return;
 		}
 	}

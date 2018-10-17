@@ -150,6 +150,7 @@ int thread_fork(const char *name, struct proc *proc,
  */
 __DEAD void thread_exit(void);
 
+__DEAD void thread_stop(void);
 /*
  * Cause the current thread to yield to the next runnable thread, but
  * itself stay runnable.
