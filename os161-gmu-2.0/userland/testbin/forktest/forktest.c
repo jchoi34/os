@@ -166,6 +166,22 @@ test(int nowait)
 	putchar('\n');
 }
 
+static void test_2()
+{
+int pid=dofork();
+int x;
+if(pid==0)
+{
+putchar('1');
+}
+else
+{
+putchar('0');
+waitpid(pid,&x,0);
+putchar('2');
+}
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -182,9 +198,10 @@ main(int argc, char *argv[])
 	}
 	warnx("Starting. Expect this many:");
 	write(STDERR_FILENO, expected, strlen(expected));
-
+       
 	test(nowait);
 
 	warnx("Complete.");
+        test_2();
 	return 0;
 }
