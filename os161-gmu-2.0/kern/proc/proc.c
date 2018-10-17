@@ -307,9 +307,25 @@ proc_create_runprogram(const char *name)
                 array_set(cv_table, pid, c);
         }
 
-        //s->exitcode = -1;
-        //s->waiting = 0;
-        //array_set(status_table, pid, s);
+	// add child pid to head of list of parent's children
+	struct pid_list *parents_child;
+        parents_child = kmalloc(sizeof(*parents_child));
+        if(parents_child == NULL) {
+                kfree(newproc);
+		lock_destroy(array_get(lock_table, pid));
+		array_set(lock_table, pid, NULL);
+		lock_destroy(array_get(cv_table, pid));
+		array_set(cv_table, pid, NULL);
+		lock_release(getpid_lock);
+		return NULL;
+        }
+        parents_child->pid = pid+1;
+        parents_child->exitcode = 0;
+        parents_child->waiting = 0;
+        parents_child->exited = 0;
+        parents_child->next = curproc->children;
+        curproc->children = parents_child;
+
         newproc->parent = curproc;
 	newproc->numthreads = 0;
 	lock_release(getpid_lock);

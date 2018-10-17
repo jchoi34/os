@@ -46,18 +46,8 @@ pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 		return -1;
 	}	
 		
-	/*p = array_get(process_table, pid - 1);	// get the process from table using pid
-	if(p == NULL){	// process nonexistent
-		lock_release(getpid_lock);
-		lock_release(l);
-		if(status != NULL)
-			*status = ESRCH;
-		*err = ESRCH;
-		return -1;
-	}*/
 	c = array_get(cv_table, pid-1);
-	//s = array_get(status_table, pid-1);
-	if(temp->exitcode != -1){	// process already exited so return immediately
+	if(temp->exited != 0){	// process already exited so return immediately
 		lock_release(l);
 		return pid;
 	}

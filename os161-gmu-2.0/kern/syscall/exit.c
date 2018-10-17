@@ -19,10 +19,12 @@ void sys__exit(int exitcode) {
 	struct pid_list *temp;
 
 	temp = curproc->parent->children;
+	
 
 	while(temp != NULL) {
 		if(temp->pid == curproc->pid) {
 			temp->exitcode = _MKWAIT_EXIT(exitcode);
+			temp->exited = 1;
 			break;
 		}
 		temp = temp->next;
@@ -39,6 +41,7 @@ void sys__exit(int exitcode) {
                 curproc->children = curproc->children->next;  
                 kfree(tofree);
         }                                                                 
+	curproc->children = NULL;
 	lock_release(l);
 	
 	struct proc *p = curproc;	

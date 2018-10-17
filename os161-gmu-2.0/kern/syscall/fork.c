@@ -93,8 +93,9 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 		goto err2;
 	}
 	parents_child->pid = pid+1;
-	parents_child->exitcode = -1;
+	parents_child->exitcode = 0;
 	parents_child->waiting = 0;
+	parents_child->exited = 0;
 	parents_child->next = curproc->children;	
 	curproc->children = parents_child;
 

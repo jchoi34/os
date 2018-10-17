@@ -50,6 +50,7 @@ struct pid_list {
     struct pid_list *next;
 	int exitcode;
 	int waiting;
+	int exited;
 };
 
 struct status {

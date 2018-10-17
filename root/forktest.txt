@@ -1,0 +1,47 @@
+Script started on Wed 17 Oct 2018 01:59:42 PM EDT
+[?1034hbash-4.2$ sys161 kernel "p testbin/forktest"
+sys161: System/161 release 2.0.2, compiled Feb  2 2015 11:24:13
+
+OS/161 base system version 2.0
+Copyright (c) 2000, 2001-2005, 2008-2011, 2013, 2014
+   President and Fellows of Harvard College.  All rights reserved.
+
+Put-your-group-name-here's system version 0 (ASST4a #96)
+
+16140k physical memory available
+Device probe...
+lamebus0 (system main bus)
+emu0 at lamebus0
+ltrace0 at lamebus0
+ltimer0 at lamebus0
+beep0 at ltimer0
+rtclock0 at ltimer0
+lrandom0 at lamebus0
+random0 at lrandom0
+lhd0 at lamebus0
+lhd1 at lamebus0
+lser0 at lamebus0
+con0 at lser0
+
+cpu0: MIPS/161 (System/161 2.x) features 0x0
+cpu1: MIPS/161 (System/161 2.x) features 0x0
+OS/161 kernel: p testbin/forktest
+Operation took 0.000666040 seconds
+OS/161 kernel [? for menu]: (program name unknown): Starting. Expect this many:
+|----------------------------|
+001111222322332322333333333333
+(program name unknown): Complete.
+
+OS/161 kernel [? for menu]: q
+Shutting down.
+The system is halted.
+cpu1: offline.
+sys161: 132602923 cycles (72126591 run, 60476332 global-idle)
+sys161:   cpu0: 38985380 kern, 280755 user, 2090960 idle; 13400 ll, 13400/0 sc, 47006 sync
+sys161:   cpu1: 19608788 kern, 156671 user, 21591636 idle; 1155 ll, 1155/0 sc, 3037 sync
+sys161: 1937 irqs 24665 exns 0r/0w disk 3r/911w console 9r/0w/3m emufs 0r/0w net
+sys161: Elapsed real time: 4.646946 seconds (28.5355 mhz)
+sys161: Elapsed virtual time: 5.308406516 seconds (25 mhz)
+bash-4.2$ exit
+
+Script done on Wed 17 Oct 2018 02:00:02 PM EDT
