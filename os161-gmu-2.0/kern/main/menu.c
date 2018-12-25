@@ -32,11 +32,13 @@
 #include <kern/reboot.h>
 #include <kern/unistd.h>
 #include <limits.h>
+#include <spl.h>
 #include <lib.h>
 #include <uio.h>
 #include <clock.h>
 #include <thread.h>
 #include <proc.h>
+#include <proctable.h>
 #include <vfs.h>
 #include <sfs.h>
 #include <syscall.h>
@@ -78,22 +80,17 @@ cmd_progthread(void *ptr, unsigned long nargs)
 
 	KASSERT(nargs >= 1);
 
-	if (nargs > 2) {
-		kprintf("Warning: argument passing from menu not supported\n");
-	}
-
 	/* Hope we fit. */
 	KASSERT(strlen(args[0]) < sizeof(progname));
 
 	strcpy(progname, args[0]);
 
-	result = runprogram(progname);
+	result = runprogram(progname, args, nargs);
 	if (result) {
 		kprintf("Running program %s failed: %s\n", args[0],
 			strerror(result));
 		return;
 	}
-
 	/* NOTREACHED: runprogram only returns on error. */
 }
 
@@ -120,7 +117,6 @@ common_prog(int nargs, char **args)
 	kprintf("Warning: this probably won't work with a "
 		"synchronization-problems kernel.\n");
 #endif
-
 	/* Create a process for the new program to run in. */
 	proc = proc_create_runprogram(args[0] /* name */);
 	if (proc == NULL) {
@@ -677,7 +673,7 @@ menu_execute(char *line, int isargs)
 		if (isargs) {
 			kprintf("OS/161 kernel: %s\n", command);
 		}
-
+	
 		result = cmd_dispatch(command);
 		if (result) {
 			kprintf("Menu command failed: %s\n", strerror(result));

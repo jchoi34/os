@@ -743,7 +743,7 @@ thread_startup(void (*entrypoint)(void *data1, unsigned long data2),
 	       void *data1, unsigned long data2)
 {
 	struct thread *cur;
-
+	
 	cur = curthread;
 
 	/* Clear the wait channel and set the thread state. */
@@ -759,9 +759,12 @@ thread_startup(void (*entrypoint)(void *data1, unsigned long data2),
 	/* Clean up dead threads. */
 	exorcise();
 
+/*for(i = 0; i < (int) data2; i++) {
+                kprintf("\nswitch arg: %s, nargs: %lu\n",(char *) args[i], data2);
+        }*/
+
 	/* Enable interrupts. */
 	spl0();
-
 #if OPT_SYNCHPROBS
 	/* Yield a random number of times to get a good mix of threads. */
 	{
@@ -772,8 +775,7 @@ thread_startup(void (*entrypoint)(void *data1, unsigned long data2),
 		}
 	}
 #endif
-
-	/* Call the function. */
+		/* Call the function. */
 	entrypoint(data1, data2);
 
 	/* Done. */

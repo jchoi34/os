@@ -10,7 +10,7 @@ SUBDIRS=add argtest badcall bigexec bigfile bigseek bloat conman crash \
 	filetest forkbomb forktest frack guzzle hash hog huge kitchen \
 	malloctest matmult multiexec palin parallelvm poisondisk psort \
 	quinthuge quintmat quintsort randcall redirect rmdirtest rmtest \
-	sbrktest sink sort sparsefile sty tail tictac triplehuge triplemat \
+	sbrktest sink sort sparsefile sty tail test tictac triplehuge triplemat \
 	triplesort usemtest zero
 
 # But not:

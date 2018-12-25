@@ -52,6 +52,7 @@
 #include <filetable.h>
 #include <proctable.h>
 #include <synch.h>
+#include <vm.h>
 
 /*
  * The process for the kernel; this holds all the kernel-only threads.
@@ -63,6 +64,9 @@ struct lock *getpid_lock;	// pid lock
 struct array *lock_table;
 struct array *cv_table;
 struct array *status_table;
+struct semaphore *sem_exec;
+struct semaphore *sem_runproc;
+struct semaphore *sem_proc;
 
 /*
  * Create a proc structure.
@@ -71,15 +75,20 @@ static
 struct proc *
 proc_create(const char *name)
 {
+	if(strcmp(name, "[kernel]"))
+		P(sem_proc);
 	struct proc *proc;
 
 	proc = kmalloc(sizeof(*proc));
 	if (proc == NULL) {
+		V(sem_proc);
 		return NULL;
 	}
 	proc->p_name = kstrdup(name);
 	if (proc->p_name == NULL) {
 		kfree(proc);
+		proc = NULL;
+		V(sem_proc);
 		return NULL;
 	}
 
@@ -94,6 +103,7 @@ proc_create(const char *name)
 	proc->p_filetable = NULL;
 	proc->numthreads = 0;
 	proc->children = NULL;
+	proc->runtype = 0;
 	
 	return proc;
 }
@@ -210,6 +220,7 @@ proc_destroy(struct proc *proc)
 	
 	kfree(proc->p_name);
 	kfree(proc);
+	V(sem_proc);
 }
 
 /*
@@ -218,6 +229,7 @@ proc_destroy(struct proc *proc)
 void
 proc_bootstrap(void)
 {
+	vm_bootstrap();
 	// create the processes table
 	process_table = array_create();
 	if(process_table == NULL)
@@ -244,6 +256,18 @@ proc_bootstrap(void)
 	if(getpid_lock == NULL)
 		panic("Could not create pid lock");
 
+	sem_runproc = sem_create("sem_runproc", 1);
+	if(sem_runproc == NULL)
+		panic("Could not create runproc semaphore");
+
+	sem_proc = sem_create("sem_runproc", 20);
+        if(sem_proc == NULL)
+                panic("Could not create proc semaphore");
+
+	sem_exec = sem_create("sem_exec", 1);
+	if(sem_exec == NULL)
+		panic("Could not create exec semaphore");
+
 	kproc = proc_create("[kernel]");
 	if (kproc == NULL) {
 		panic("proc_create for kproc failed\n");
@@ -269,10 +293,13 @@ proc_create_runprogram(const char *name)
 	struct lock *l;
 	struct cv *c;
 
+	P(sem_runproc);
 	newproc = proc_create(name);
 	if (newproc == NULL) {
+	V(sem_runproc);
 		return NULL;
 	}
+	newproc->runtype = 1;
 	KASSERT(getpid_lock != NULL);
 
 	lock_acquire(getpid_lock);
@@ -280,6 +307,7 @@ proc_create_runprogram(const char *name)
 	if(pid == -1) {	// no more pids
 		kfree(newproc);
 		lock_release(getpid_lock);
+		V(sem_runproc);
 		return NULL;
 	}
 	newproc->pid = pid + 1;
@@ -290,6 +318,7 @@ proc_create_runprogram(const char *name)
                 if(l == NULL) {
 			kfree(newproc);
 			lock_release(getpid_lock);
+			V(sem_runproc);
 			return NULL;
                 }
                 array_set(lock_table, pid, l);
@@ -302,6 +331,7 @@ proc_create_runprogram(const char *name)
 			lock_destroy(array_get(lock_table, pid));
 			array_set(lock_table, pid, NULL);
 			lock_release(getpid_lock);
+			V(sem_runproc);
 			return NULL;
                 }
                 array_set(cv_table, pid, c);
@@ -317,6 +347,7 @@ proc_create_runprogram(const char *name)
 		lock_destroy(array_get(cv_table, pid));
 		array_set(cv_table, pid, NULL);
 		lock_release(getpid_lock);
+		V(sem_runproc);
 		return NULL;
         }
         parents_child->pid = pid+1;

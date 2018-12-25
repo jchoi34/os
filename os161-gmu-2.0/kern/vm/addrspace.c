@@ -32,12 +32,16 @@
 #include <lib.h>
 #include <addrspace.h>
 #include <vm.h>
+#include <proc.h>
+#include <spl.h>
+#include <mips/tlb.h>
 
 /*
  * Note! If OPT_DUMBVM is set, as is the case until you start the VM
  * assignment, this file is not compiled or linked or in any way
  * used. The cheesy hack versions in dumbvm.c are used instead.
  */
+
 
 struct addrspace *
 as_create(void)
@@ -52,6 +56,14 @@ as_create(void)
 	/*
 	 * Initialize as needed.
 	 */
+	as->as_vbase1 = 0;
+	as->as_pbase1 = 0;
+	as->as_npages1 = 0;
+	as->as_vbase2 = 0;
+	as->as_pbase2 = 0;
+	as->as_npages2 = 0;
+	as->as_stackpbase = 0;
+	as->complete = 0;
 
 	return as;
 }
@@ -70,8 +82,37 @@ as_copy(struct addrspace *old, struct addrspace **ret)
 	 * Write this.
 	 */
 
-	(void)old;
+	newas->as_vbase1 = old->as_vbase1;
+	newas->writable1 = old->writable1;
+	newas->as_npages1 = old->as_npages1;
+	newas->as_vbase2 = old->as_vbase2;
+	newas->writable2 = old->writable2;
+	newas->as_npages2 = old->as_npages2;
 
+	// Use as_prepare_load to find free pages for
+	// the new address space
+	if(as_prepare_load(newas)) {
+		as_destroy(newas);
+		return ENOMEM;
+	}
+
+	KASSERT(newas->as_pbase1 != 0);
+	KASSERT(newas->as_pbase2 != 0);
+        KASSERT(newas->as_stackpbase != 0);
+
+	memmove((void *)PADDR_TO_KVADDR(newas->as_pbase1),
+                (const void *)PADDR_TO_KVADDR(old->as_pbase1),
+                old->as_npages1*PAGE_SIZE);
+
+	memmove((void *)PADDR_TO_KVADDR(newas->as_pbase2),
+		(const void *)PADDR_TO_KVADDR(old->as_pbase2),
+		old->as_npages2*PAGE_SIZE);
+
+        memmove((void *)PADDR_TO_KVADDR(newas->as_stackpbase),
+                (const void *)PADDR_TO_KVADDR(old->as_stackpbase),
+                VM_STACKPAGES*PAGE_SIZE);
+
+	newas->complete = 1;
 	*ret = newas;
 	return 0;
 }
@@ -83,6 +124,17 @@ as_destroy(struct addrspace *as)
 	 * Clean up as needed.
 	 */
 
+
+	if(as->as_pbase1 != 0) {
+		free_kpages(PADDR_TO_KVADDR(as->as_pbase1));
+	}
+	if(as->as_pbase2 != 0) {
+		free_kpages(PADDR_TO_KVADDR(as->as_pbase2));
+	}
+
+	if(as->as_stackpbase != 0) {
+		free_kpages(PADDR_TO_KVADDR(as->as_stackpbase));
+	}
 	kfree(as);
 }
 
@@ -91,7 +143,7 @@ as_activate(void)
 {
 	struct addrspace *as;
 
-	as = curproc_getas();
+	as = proc_getas();
 	if (as == NULL) {
 		/*
 		 * Kernel thread without an address space; leave the
@@ -103,6 +155,14 @@ as_activate(void)
 	/*
 	 * Write this.
 	 */
+	int spl;
+	spl = splhigh();
+	int i;
+        for (i=0; i<NUM_TLB; i++) {
+                tlb_write(TLBHI_INVALID(i), TLBLO_INVALID(), i);
+        }
+
+        splx(spl);
 }
 
 void
@@ -127,19 +187,48 @@ as_deactivate(void)
  */
 int
 as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
-		 int readable, int writeable, int executable)
+		 int readable, int writable, int executable)
 {
 	/*
 	 * Write this.
 	 */
+	size_t npages;
 
-	(void)as;
-	(void)vaddr;
-	(void)sz;
+	/* Align the region. First, the base... */
+        sz += vaddr & ~(vaddr_t)PAGE_FRAME;
+        vaddr &= PAGE_FRAME;
+
+	/* ...and now the length. */
+        sz = (sz + PAGE_SIZE - 1) & PAGE_FRAME;
+
+        npages = sz / PAGE_SIZE;
+
 	(void)readable;
-	(void)writeable;
 	(void)executable;
-	return EUNIMP;
+
+	if (as->as_vbase1 == 0) {
+                as->as_vbase1 = vaddr;
+		as->writable1 = writable;
+                as->as_npages1 = npages;
+                return 0;
+        }
+
+	if (as->as_vbase2 == 0) {
+		as->as_vbase2 = vaddr;
+		as->writable2 = writable;
+		as->as_npages2 = npages;
+		return 0;
+	}
+
+	//return EUNIMP;
+	return -1;
+}
+
+static
+void
+as_zero_region(paddr_t paddr, unsigned npages)
+{
+        bzero((void *)PADDR_TO_KVADDR(paddr), npages * PAGE_SIZE);
 }
 
 int
@@ -148,8 +237,29 @@ as_prepare_load(struct addrspace *as)
 	/*
 	 * Write this.
 	 */
+	KASSERT(as->as_pbase1 == 0);
+	KASSERT(as->as_pbase2 == 0);
+        KASSERT(as->as_stackpbase == 0);
 
-	(void)as;
+	as->as_pbase1 = KVADDR_TO_PADDR(alloc_kpages(as->as_npages1));
+        if (as->as_pbase1 == 0) {
+                return ENOMEM;
+        }
+
+	as->as_pbase2 = KVADDR_TO_PADDR(alloc_kpages(as->as_npages2));
+	if (as->as_pbase2 == 0) {
+		return ENOMEM;
+	}
+
+	as->as_stackpbase = KVADDR_TO_PADDR(alloc_kpages(VM_STACKPAGES));
+	if (as->as_stackpbase == 0) {
+                return ENOMEM;
+        }
+
+	as_zero_region(as->as_pbase1, as->as_npages1);
+	as_zero_region(as->as_pbase2, as->as_npages2);
+        as_zero_region(as->as_stackpbase, VM_STACKPAGES);
+
 	return 0;
 }
 
@@ -160,7 +270,8 @@ as_complete_load(struct addrspace *as)
 	 * Write this.
 	 */
 
-	(void)as;
+
+	as->complete = 1;
 	return 0;
 }
 

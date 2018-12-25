@@ -88,6 +88,7 @@ switchframe_init(struct thread *thread,
          * This has implications for code at the bottom of
          * thread_switch, described in thread.c.
          */
+
         sf->sf_s0 = (uint32_t)entrypoint;
         sf->sf_s1 = (uint32_t)data1;
         sf->sf_s2 = (uint32_t)data2;

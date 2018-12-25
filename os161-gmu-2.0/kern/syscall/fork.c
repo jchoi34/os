@@ -5,6 +5,7 @@
 #include <syscall.h>
 #include <array.h>
 #include <synch.h>
+#include <spl.h>
 #include <kern/errno.h>
 #include <mips/trapframe.h>
 #include <addrspace.h>
@@ -37,6 +38,8 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 	struct lock *l;
 	struct cv *c;
 	struct status *s;
+
+	int spl = splhigh();
 	
 	// assign a pid and reserve a space in proc table
 	KASSERT(getpid_lock != NULL);
@@ -79,6 +82,7 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 	
 	if(result == ENOMEM) {
 		kfree(s);
+		s = NULL;
 		*err = ENOMEM;
 		goto err1;
 	}
@@ -99,12 +103,16 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 	parents_child->next = curproc->children;	
 	curproc->children = parents_child;
 
+	struct addrspace *child_as;
+
 	// copy the parent's memory into child processes's addr space
-	result = as_copy(curproc->p_addrspace, &child->p_addrspace);
+	result = as_copy(curproc->p_addrspace, &child_as);
 	if(result == ENOMEM) {
 		*err = ENOMEM;
 		goto err3;
 	}
+	
+	child->p_addrspace = child_as;
 
 	// create a deep copy of parent's trapframe
 	// trapframe struct does not contain any pointers
@@ -126,12 +134,15 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 		goto err3;
 	}
 	
+	
+	splx(spl);
 	return pid+1;
 
 	err3:
 		parents_child = curproc->children;
 		curproc->children = curproc->children->next;
 		kfree(parents_child);
+		parents_child = NULL;
 	err2:
 		proc_destroy(child);
 	err1:
@@ -139,5 +150,6 @@ pid_t sys_fork(struct trapframe *tf, int *err) {
 		array_remove(process_table, pid);
 		lock_release(getpid_lock);
 	err0:
+		splx(spl);
 		return -1;
 }

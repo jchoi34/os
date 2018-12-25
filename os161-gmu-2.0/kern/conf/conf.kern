@@ -383,6 +383,7 @@ file      syscall/getpid.c
 file      syscall/exit.c
 file      syscall/waitpid.c
 file      syscall/fork.c
+file      syscall/execv.c
 
 #
 # Startup and initialization

@@ -80,6 +80,7 @@ struct proc {
 	struct semaphore *p_sem;
 	struct pid_list *children; // child pids
 	int numthreads;
+	int runtype;
 	struct proc *parent;
 };
 

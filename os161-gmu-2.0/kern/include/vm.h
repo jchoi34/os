@@ -44,6 +44,16 @@
 #define VM_FAULT_WRITE       1    /* A write was attempted */
 #define VM_FAULT_READONLY    2    /* A write to a readonly page was attempted*/
 
+// page table entry
+struct pt_entry {
+	paddr_t p_addr;
+	int state;
+	struct pt_entry* next;
+};
+
+#define VM_STACKPAGES 18
+extern unsigned int TOTAL_PAGES;
+extern struct pt_entry *page_table;
 
 /* Initialization function */
 void vm_bootstrap(void);

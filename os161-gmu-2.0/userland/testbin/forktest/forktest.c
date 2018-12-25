@@ -1,40 +1,40 @@
 /*
- * Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009
- *	The President and Fellows of Harvard College.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE UNIVERSITY AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE UNIVERSITY OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
+ *  * Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009
+ *   *	The President and Fellows of Harvard College.
+ *    *
+ *     * Redistribution and use in source and binary forms, with or without
+ *      * modification, are permitted provided that the following conditions
+ *       * are met:
+ *        * 1. Redistributions of source code must retain the above copyright
+ *         *    notice, this list of conditions and the following disclaimer.
+ *          * 2. Redistributions in binary form must reproduce the above copyright
+ *           *    notice, this list of conditions and the following disclaimer in the
+ *            *    documentation and/or other materials provided with the distribution.
+ *             * 3. Neither the name of the University nor the names of its contributors
+ *              *    may be used to endorse or promote products derived from this software
+ *               *    without specific prior written permission.
+ *                *
+ *                 * THIS SOFTWARE IS PROVIDED BY THE UNIVERSITY AND CONTRIBUTORS ``AS IS'' AND
+ *                  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *                   * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *                    * ARE DISCLAIMED.  IN NO EVENT SHALL THE UNIVERSITY OR CONTRIBUTORS BE LIABLE
+ *                     * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ *                      * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ *                       * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ *                        * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *                         * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ *                          * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ *                           * SUCH DAMAGE.
+ *                            */
 
 /*
- * forktest - test fork().
- *
- * This should work correctly when fork is implemented.
- *
- * It should also continue to work after subsequent assignments, most
- * notably after implementing the virtual memory system.
- */
+ *  * forktest - test fork().
+ *   *
+ *    * This should work correctly when fork is implemented.
+ *     *
+ *      * It should also continue to work after subsequent assignments, most
+ *       * notably after implementing the virtual memory system.
+ *        */
 
 #include <unistd.h>
 #include <string.h>
@@ -43,14 +43,14 @@
 #include <err.h>
 
 /*
- * This is used by all processes, to try to help make sure all
- * processes have a distinct address space.
- */
+ *  * This is used by all processes, to try to help make sure all
+ *   * processes have a distinct address space.
+ *    */
 static volatile int mypid;
 
 /*
- * Helper function for fork that prints a warning on error.
- */
+ *  * Helper function for fork that prints a warning on error.
+ *   */
 static
 int
 dofork(void)
@@ -64,10 +64,10 @@ dofork(void)
 }
 
 /*
- * Check to make sure each process has its own address space. Write
- * the pid into the data segment and read it back repeatedly, making
- * sure it's correct every time.
- */
+ *  * Check to make sure each process has its own address space. Write
+ *   * the pid into the data segment and read it back repeatedly, making
+ *    * sure it's correct every time.
+ *     */
 static
 void
 check(void)
@@ -89,14 +89,14 @@ check(void)
 }
 
 /*
- * Wait for a child process.
- *
- * This assumes dowait is called the same number of times as dofork
- * and passed its results in reverse order. Any forks that fail send
- * us -1 and are ignored. The first 0 we see indicates the fork that
- * generated the current process; that means it's time to exit. Only
- * the parent of all the processes returns from the chain of dowaits.
- */
+ *  * Wait for a child process.
+ *   *
+ *    * This assumes dowait is called the same number of times as dofork
+ *     * and passed its results in reverse order. Any forks that fail send
+ *      * us -1 and are ignored. The first 0 we see indicates the fork that
+ *       * generated the current process; that means it's time to exit. Only
+ *        * the parent of all the processes returns from the chain of dowaits.
+ *         */
 static
 void
 dowait(int nowait, int pid)
@@ -126,8 +126,8 @@ dowait(int nowait, int pid)
 }
 
 /*
- * Actually run the test.
- */
+ *  * Actually run the test.
+ *   */
 static
 void
 test(int nowait)
@@ -135,11 +135,11 @@ test(int nowait)
 	int pid0, pid1, pid2, pid3;
 
 	/*
-	 * Caution: This generates processes geometrically.
-	 *
-	 * It is unrolled to encourage gcc to registerize the pids,
-	 * to prevent wait/exit problems if fork corrupts memory.
-	 */
+ * 	 * Caution: This generates processes geometrically.
+ * 	 	 *
+ * 	 	 	 * It is unrolled to encourage gcc to registerize the pids,
+ * 	 	 	 	 * to prevent wait/exit problems if fork corrupts memory.
+ * 	 	 	 	 	 */
 
 	pid0 = dofork();
 	putchar('0');
@@ -155,9 +155,9 @@ test(int nowait)
 	check();
 
 	/*
-	 * These must be called in reverse order to avoid waiting
-	 * improperly.
-	 */
+ * 	 * These must be called in reverse order to avoid waiting
+ * 	 	 * improperly.
+ * 	 	 	 */
 	dowait(nowait, pid3);
 	dowait(nowait, pid2);
 	dowait(nowait, pid1);
@@ -165,6 +165,77 @@ test(int nowait)
 
 	putchar('\n');
 }
+/*
+static void test_2()
+{
+int pid=dofork();
+int x;
+if(pid==0)
+{
+putchar('1');
+exit(0);
+}
+else
+{
+putchar('0');
+waitpid(pid,&x,0);
+putchar('2');
+}
+}
+
+static void test_3()
+{
+int pid=dofork();
+
+int x;
+
+if(pid==0)
+{
+warnx("in child");
+exit(0);
+}
+else
+{
+warnx("in parent %d", pid);
+warnx("waiting on child");
+waitpid(pid,&x,0);
+warnx("child returned with status %d",x);
+}
+
+}
+
+static void test_4()
+{
+int pid,pid2;
+int x,y;
+
+
+pid=dofork();
+pid2=dofork();
+putchar('P');//P can come in any order
+if(pid2==0)
+{
+putchar('A');
+exit(0);
+}
+else
+{
+waitpid(pid2,&x,0);
+putchar('B');//B cannot be printed until A has
+}
+if(pid==0)
+{
+putchar('C');//C can be printed after one AB combo
+exit(0);
+}
+else
+{
+waitpid(pid,&y,0);//D is printed last
+putchar('D');
+}
+
+}
+*/
 
 int
 main(int argc, char *argv[])
@@ -182,9 +253,14 @@ main(int argc, char *argv[])
 	}
 	warnx("Starting. Expect this many:");
 	write(STDERR_FILENO, expected, strlen(expected));
-
+       
 	test(nowait);
 
 	warnx("Complete.");
+        //(void) test_2();
+        //warnx("test_2 complete should read 012");
+        //(void) test_3();
+        //warnx("test_3 complete");
+        //(void)test_4();
 	return 0;
 }

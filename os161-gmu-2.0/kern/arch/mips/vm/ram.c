@@ -127,7 +127,7 @@ ram_stealmem(unsigned long npages)
 paddr_t
 ram_getsize(void)
 {
-	return lastpaddr;
+	return lastpaddr - firstpaddr;
 }
 
 /*

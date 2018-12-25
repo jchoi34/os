@@ -31,7 +31,6 @@ pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 	int valid_pid = 0;
 	struct pid_list *temp = curproc->children;
 	while(temp != NULL) {
-		lock_release(l);
 		if(pid == temp->pid) {
 			valid_pid = 1;
 			break;
@@ -46,12 +45,13 @@ pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 		return -1;
 	}	
 		
-	c = array_get(cv_table, pid-1);
 	if(temp->exited != 0){	// process already exited so return immediately
 		lock_release(l);
+		*status = 0;
 		return pid;
 	}
 	else {			// process not yet exited
+		c = array_get(cv_table, pid-1);
 		temp->waiting = 1;	// let child know parent is waiting	
 		cv_wait(c, l); // wait for the child while releasing its lock
 
@@ -62,6 +62,8 @@ pid_t sys_waitpid(pid_t pid, int *status, int options, int *err) {
 				*status = WTERMSIG(temp->exitcode);
 			else if(WIFSTOPPED(temp->exitcode))
 				*status = WSTOPSIG(temp->exitcode);
+			else
+				*status = temp->exitcode;
 		}
 
 		cv_signal(c, l);	// let the child continue with its exit
